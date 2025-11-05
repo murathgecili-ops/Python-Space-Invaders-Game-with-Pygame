@@ -1,0 +1,61 @@
+import pygame
+import gradio as gr
+import os
+
+os.environ['SDL_AUDIODRIVER'] = 'dummy'
+
+def play_game():
+    pygame.init()
+    screen = pygame.display.set_mode((800, 600))
+    pygame.display.set_caption("Space Invaders - Murat Edition")
+
+    # Grafikler (buradan değiştir!)
+    player = pygame.image.load("Graphics/player.png")
+    alien = pygame.image.load("Graphics/alien.png")
+    bg = pygame.image.load("Graphics/background.png")
+    bullet = pygame.image.load("Graphics/bullet.png")
+
+    clock = pygame.time.Clock()
+    player_x = 370
+    bullet_y = 480
+    bullet_state = "ready"
+    running = True
+    frame = 0
+
+    while running and frame < 600:  # 10 sn demo
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        screen.blit(bg, (0, 0))
+        screen.blit(player, (player_x, 480))
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT]: player_x = max(0, player_x - 5)
+        if keys[pygame.K_RIGHT]: player_x = min(736, player_x + 5)
+        if keys[pygame.K_SPACE] and bullet_state == "ready":
+            bullet_state = "fire"
+            bullet_x = player_x
+
+        if bullet_state == "fire":
+            screen.blit(bullet, (bullet_x + 16, bullet_y))
+            bullet_y -= 15
+            if bullet_y <= 0:
+                bullet_y = 480
+                bullet_state = "ready"
+
+        pygame.display.flip()
+        clock.tick(60)
+        frame += 1
+
+    pygame.quit()
+    return "Demo bitti! Ok tuşları + Space ile oyna. Grafik değiştir: Graphics klasörü."
+
+with gr.Blocks() as demo:
+    gr.Markdown("# 🚀 Space Invaders - AI Modlu!")
+    gr.Markdown("Grafik değiştir: Repo'da Graphics/ güncelle, push et.")
+    btn = gr.Button("Oyunu Başlat (10 sn demo)")
+    out = gr.Textbox()
+    btn.click(play_game, outputs=out)
+
+demo.launch()
